@@ -8,6 +8,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
@@ -28,11 +29,10 @@ public class MainActivity extends Activity {
 
 	private int currentIndex = 1;
 	private VideoView vv;
-	private TextView ads_tv;
+	private TextView called_tv,input__tv;
 
 	private MediaPlayer mp;
 	private AudioManager am;
-	private StringBuilder information;
 	
 	private TextToSpeech tts;
 	
@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); // 设置水平
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN); // 隐藏状态栏
 		setContentView(R.layout.activity_main);
-		
+
 		initialWidget();
 	}
 
@@ -70,46 +70,55 @@ public class MainActivity extends Activity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		controlVolume(keyCode);
+		if  (tts.isSpeaking())  return true;
 		switch (keyCode) {
 		case Params.KeyValue.NUMBER_0:
-			information.append("0");
+			input__tv.append("0");
 			break;
 		case Params.KeyValue.NUMBER_1:
-			information.append("1");
+			input__tv.append("1");
 			break;
 		case Params.KeyValue.NUMBER_2:
-			information.append("2");
+			input__tv.append("2");
 			break;
 		case Params.KeyValue.NUMBER_3:
-			information.append("3");
+			input__tv.append("3");
 			break;
 		case Params.KeyValue.NUMBER_4:
-			information.append("4");
+			input__tv.append("4");
 			break;
 		case Params.KeyValue.NUMBER_5:
-			information.append("5");
+			input__tv.append("5");
 			break;
 		case Params.KeyValue.NUMBER_6:
-			information.append("6");
+			input__tv.append("6");
 			break;
 		case Params.KeyValue.NUMBER_7:
-			information.append("7");
+			input__tv.append("7");
 			break;
 		case Params.KeyValue.NUMBER_8:
-			information.append("8");
+			input__tv.append("8");
 			break;
 		case Params.KeyValue.NUMBER_9:
-			information.append("9");
+			input__tv.append("9");
 			break;
 		case Params.KeyValue.NUMBER_BACK:
-			buttonDelete(information);
+			buttonDelete(input__tv.getText());
 			break;
 		case Params.KeyValue.NUMBER_ENTER:
-			buttonEnter(information);
+			buttonEnter(input__tv.getText());
 			break;
 		case Params.KeyValue.NUMBER_DEL:
-			ads_tv.setText("");
+			called_tv.setText("");
+			input__tv.setText("");
+			called_tv.setVisibility(View.GONE);
+			if  (!vv.isPlaying())  vv.start();
+			break;
+		case Params.KeyValue.NUMBER_PLUS:
+			am.adjustStreamVolume(AudioManager.STREAM_MUSIC,AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI); 
+			break;
+		case Params.KeyValue.NUMBER_REDUCE:
+			am.adjustStreamVolume(AudioManager.STREAM_MUSIC,AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);// 调低声音
 			break;
 		}
 		return true;
@@ -138,48 +147,34 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private boolean controlVolume(int id){
-		switch (id) {
-		case Params.KeyValue.NUMBER_PLUS:
-			am.adjustStreamVolume(AudioManager.STREAM_MUSIC,AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI); 
-			return true;
-		case Params.KeyValue.NUMBER_REDUCE:
-			am.adjustStreamVolume(AudioManager.STREAM_MUSIC,AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);// 调低声音
-			return true;
-		}
-		return false;
-	}
-	
 	private void buttonDelete(CharSequence number){
 		StringBuffer sb = new StringBuffer(number);
 		if (sb.length() >= 1) {
 			sb.deleteCharAt(number.length() - 1);
-			ads_tv.setText(sb.toString());
-		} else {
-			vv.start();
+			input__tv.setText(sb.toString());
 		}
 	}
 	
 	private void buttonEnter(CharSequence number){
-		if (number.length() == 0) return;
+		if  (number.length() == 0)  return;
 		vv.pause();
 		playDingDong();
-		ads_tv.setVisibility(View.VISIBLE);
-		ads_tv.setText("请" + number.toString() + "号贵宾就餐");
-		tts.speak("     请" + number.toString() + "号贵宾就餐", TextToSpeech.QUEUE_ADD, null);
-		information.setLength(0);
+		input__tv.setText("");
+		called_tv.setVisibility(View.VISIBLE);
+		called_tv.setText("请" + number.toString() + "号贵宾就餐");
+		tts.speak("请" + number.toString() + "号贵宾就餐", TextToSpeech.QUEUE_ADD, null);
+		mHandler.sendMessageDelayed(mHandler.obtainMessage(1) , 3000);
 	}
 	
 	
 	@SuppressLint("HandlerLeak")
 	private Handler mHandler = new Handler(){
-	
-		public void handleMessage(android.os.Message msg) {
+
+		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case 1:
 				vv.start();
-				ads_tv.setVisibility(View.GONE);
-				information.setLength(0);     
+				called_tv.setVisibility(View.GONE);
 				break;
 			}
 		};
@@ -204,8 +199,9 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		ads_tv = (TextView) findViewById(R.id.ads_textview);
-		ads_tv.setVisibility(View.GONE);
+		called_tv = (TextView) findViewById(R.id.ads_textview);
+		called_tv.setVisibility(View.GONE);
+		input__tv = (TextView)findViewById(R.id.input_info);
 		am = (AudioManager) getSystemService(Service.AUDIO_SERVICE);
 		
 		tts = new TextToSpeech(MainActivity.this,new OnInitListener() {
@@ -215,7 +211,6 @@ public class MainActivity extends Activity {
 			}
 		});
 		
-		information = new StringBuilder();
 	}
 	
 }

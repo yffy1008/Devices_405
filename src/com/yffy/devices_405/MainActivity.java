@@ -1,5 +1,6 @@
 package com.yffy.devices_405;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import android.media.AudioManager;
@@ -20,6 +21,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+@SuppressLint("HandlerLeak")
 public class MainActivity extends Activity {
 
 	private final int NEXT = 0;
@@ -42,8 +44,7 @@ public class MainActivity extends Activity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN); // 隐藏状态栏
 		setContentView(R.layout.activity_main);
 		
-		information = new StringBuilder();
-		initalWidget();
+		initialWidget();
 	}
 
 	@Override
@@ -117,26 +118,25 @@ public class MainActivity extends Activity {
 	// 播放控制
 	private void startPlay(String number, int mode) {
 		currentIndex = 1;
-		vv.setVideoPath(Params.Video.HOME_PATH + "007.rmvb");
+		vv.setVideoPath(Params.Video.HOME_PATH + "001.avi");
 		vv.start();
 	}
 
-//	private void playErro() {
-//		try {
-//			mp.reset();
-//			mp.setDataSource(Params.Video.HOME_PATH + "erro.mp3");
-//			mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//			mp.prepare();
-//			mp.start();
-//		} catch (IllegalArgumentException e) {
-//			e.printStackTrace();
-//		} catch (IllegalStateException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		TextUtils.showOnScreen(MiddleDevice.this,"输入错误");
-//	}
+	private void playDingDong() {
+		try {
+			mp.reset();
+			mp.setDataSource(Params.Video.HOME_PATH + "dingdong.mp3");
+			mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+			mp.prepare();
+			mp.start();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private boolean controlVolume(int id){
 		switch (id) {
@@ -161,14 +161,15 @@ public class MainActivity extends Activity {
 	}
 	
 	private void buttonEnter(CharSequence number){
-		if (number.equals("")) return;
+		if (number.length() == 0) return;
 		vv.pause();
-		ads_tv.setText("请" + number.toString() + "号贵宾就餐");
+		playDingDong();
 		ads_tv.setVisibility(View.VISIBLE);
-		tts.speak("请" + number.toString() + "号贵宾就餐", TextToSpeech.QUEUE_ADD, null);
-		mHandler.sendEmptyMessageDelayed(1,3000);
+		ads_tv.setText("请" + number.toString() + "号贵宾就餐");
+		tts.speak("     请" + number.toString() + "号贵宾就餐", TextToSpeech.QUEUE_ADD, null);
 		information.setLength(0);
 	}
+	
 	
 	@SuppressLint("HandlerLeak")
 	private Handler mHandler = new Handler(){
@@ -184,7 +185,7 @@ public class MainActivity extends Activity {
 		};
 	};
 
-	private void initalWidget() {
+	private void initialWidget() {
 		vv = (VideoView)findViewById(R.id.vv);
 		vv.setOnCompletionListener(new OnCompletionListener() {
 			@Override
@@ -199,7 +200,7 @@ public class MainActivity extends Activity {
 		mp.setOnCompletionListener(new OnCompletionListener() {
 			@Override
 			public void onCompletion(MediaPlayer mp1) {
-				mp.release();
+//				mp.release();
 			}
 		});
 
@@ -213,6 +214,8 @@ public class MainActivity extends Activity {
 				tts.setLanguage(Locale.CHINESE);
 			}
 		});
+		
+		information = new StringBuilder();
 	}
 	
 }

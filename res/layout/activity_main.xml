@@ -1,0 +1,32 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <VideoView
+            android:id="@+id/vv"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="center|center_vertical" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/ads_textview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center|center_vertical"
+        android:background="#0000FF"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        android:textIsSelectable="true"
+        android:textSize="150sp" />
+
+</FrameLayout>
